@@ -1,6 +1,6 @@
 # Predictin Illegal Fishing 
 
-##What Is This Project About?
+## What Is This Project About?
 
 Illegal, Unreported, and Unregulated (IUU) fishing is a major global problem. It removes too many fish from the ocean, harms marine life, and hurts honest fishermen and coastal communities. This senior project builds a system to help spot suspicious fishing activity by combining five public datasets. The goal is to create a machine learning model that gives each vessel a risk score (for example, "98% chance of illegal activity") so authorities can focus inspections on the most likely violators.
 The project is tailored to two important areas:
@@ -9,7 +9,7 @@ Houston and the Gulf of Mexico: where Mexican boats sometimes cross into U.S. wa
 Tunisia and the Mediterranean Sea: where overfishing of tuna, swordfish, and sharks is a serious issue, even with rules from the General Fisheries Commission for the Mediterranean (GFCM).
 
 
-##The Five Datasets Used
+## The Five Datasets Used
 
 The project combines information from five main sources. Each provides a different piece of the puzzle:
 
