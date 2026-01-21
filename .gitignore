@@ -1,0 +1,36 @@
+# Exclude large data folders
+CSV/
+Updated CSV/
+
+# But allow small essential files
+!IUUList-20251108.csv
+!Updated CSV/**/*.csv
+!Updated CSV/**/*.xls
+!Updated CSV/**/*.xlsx
+
+# System files
+.DS_Store
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python virtual environment
+venv/
+env/
+.venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Large installer files
+*.sh
+
+# But allow small CSV files in root
+!*.csv
