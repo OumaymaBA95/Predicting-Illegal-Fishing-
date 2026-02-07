@@ -2,6 +2,22 @@
 CSV/
 Updated CSV/
 
+# Large raw datasets / downloads (keep out of git)
+mmsi-daily-csvs-10-v3-*/
+World EEZ Boundaries (v12) copy/
+ World EEZ Boundaries (v12) copy/
+Combined IUU Vessel List (Global RFMO Compilation) copy/
+iuu_fishing_index_2025-data_and_disclaimer*/
+xView3-SAR Ship Detection Dataset/
+fa615300-b670-11f0-b282-dfbcfd65324c copy/
+e6da0980-0062-11f1-80be-1992e974ff46/
+vendor/
+*.zip
+
+# Allowlist small/intentional zip artifacts to commit
+!iuu_fishing_index_2025-data_and_disclaimer.zip
+!outputs/vessel_features_*.zip
+
 # But allow small essential files
 !IUUList-20251108.csv
 !Updated CSV/**/*.csv
@@ -20,11 +36,15 @@ __pycache__/
 .idea/
 *.swp
 *.swo
+.Rhistory
 
 # Python virtual environment
 venv/
 env/
 .venv/
+
+# Streamlit local config/cache (when HOME is set to project)
+.streamlit/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
@@ -32,5 +52,9 @@ env/
 # Large installer files
 *.sh
 
+# Generated outputs (keep small top-k lists, avoid huge feature matrices)
+outputs/vessel_features_*.csv
+outputs/ranked_vessels_full*.csv
+
 # But allow small CSV files in root
-!*.csv
+!/*.csv

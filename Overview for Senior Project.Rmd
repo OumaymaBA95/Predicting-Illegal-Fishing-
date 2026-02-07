@@ -1,0 +1,189 @@
+---
+title: "IUU Fishing Vessel Risk Ranking Project"
+subtitle: "Machine Learning Approach to Prioritize Suspicious Vessels"
+author: "Oumayma"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+    code_folding: show
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Project Overview
+
+This project develops a machine learning-based ranking system to identify fishing vessels with elevated risk of engaging in Illegal, Unreported, and Unregulated (IUU) fishing.
+
+*Goal* 
+
+Prioritize vessels for inspection / investigation — not make definitive legal decisions.
+  - Higher risk score = more suspicious relative to others
+  - Output = ranked list to focus human attention (triage tool)
+
+*Core technique* 
+
+Positive-Unlabeled (PU) learning + Gradient Boosted Decision Trees (GBDT)
+
+*Time coverage* 
+
+Mainly 2013–2024 (Global Fishing Watch AIS data)
+
+# 1. The Problem & Motivation
+
+  - IUU fishing causes major ecological & economic damage worldwide
+  - Confirmed IUU cases are very rare (only ~10–20 known positives in many datasets)
+  - Vast majority of vessels = unlabeled (not proven legal or illegal)
+  - Manual inspection of thousands of vessels is impossible
+  
+→ Need an automated way to rank vessels by suspicion level
+
+
+# 2. Data Sources and Preparation
+The project aggregates data from multiple sources to build a dataset of vessel features.
+
+*Main Inputs*
+
+- AIS Data (from Global Fishing Watch - GFW): Daily CSV files (e.g., mmsi-daily-csvs-10-v3-2013/ to ...-2024/). AIS is automatic vessel tracking via radio signals. It includes positions (lat/long), fishing hours, and gaps in signals (which might indicate tampering).
+
+- IUU Labels: A CSV file (e.g., combined_iuu_list.csv or IUUList-20251108.csv) listing known IUU vessels by MMSI (a 9-digit vessel ID). These are the "positive" examples.
+Optional (for richer features):
+
+- EEZ Boundaries (Exclusive Economic Zones): From a CSV like eez_boundaries_v12.csv. Used to calculate proximity to restricted waters (a proxy for potential illegal entry).
+
+- SAR Detections (Synthetic Aperture Radar): From xView3 dataset (public.csv and validation.csv). Counts nearby "dark vessel" detections (ships not broadcasting AIS).
+
+- Vessel Metadata: From GFW's fishing-vessels-v3.csv (in a ZIP). Adds details like vessel length, flag country, and gear type.
+
+
+*Data Building Process*
+
+- Processes AIS data year-by-year (or a custom range via env vars like GFW_START_YEAR=2013).
+
+- For each vessel (identified by MMSI), it computes aggregated features like:
+    - Activity: Total fishing hours, active days, peak months.
+    - Location: Mean/variance of lat/long, unique cells visited (dispersion).
+    - Behavior: Fishing intensity (max/median hours), seasonality (e.g., entropy of active months).
+    - Suspicious Signals: AIS gaps (e.g., fraction over 6/12 hours), proximity to EEZ boundaries (e.g., within 50km), nearby SAR hits.
+    - Metadata: Flag changes (entropy/diversity), gear types.
+
+- Outputs: CSV files like vessel_features_all_years.csv (one row per vessel with ~50 features + IUU label).
+
+*Challenges Addressed*
+
+- Sparse labels: Only ~11 positives in the example data.
+
+- Imbalanced data: Most vessels are unlabeled, so the script identifies "reliable negatives" (e.g., low-activity vessels far from risk zones).
+
+
+
+# 3. Methodology: Modeling and Training
+
+Aggregated per vessel (from daily AIS records):
+
+- *Activity*
+
+  - Total/active fishing days
+  - Fishing hours (sum, max, p95, median)
+  - Fishing days fraction
+
+- *Spatial Behavior*
+
+  - Mean / variance of latitude & longitude
+  - Unique grid cells visited
+  - Dispersion measures
+
+- *Suspicious Signals*
+
+  - AIS gaps (mean duration, fraction >6h / >12h)
+  - Distance to nearest EEZ boundary (mean, near 50 km flag)
+  - Nearby SAR detections (mean in region)
+
+- *Temporal Patterns*
+
+  - Seasonality (month entropy, peak month fraction)
+  - Fishing intensity per point
+
+- *Identity*
+
+  - Flag changes (unique count, entropy)
+  - Gear type diversity
+  
+# 4. Modeling Approach
+
+*Positive-Unlabeled (PU) Learning*
+
+  - Positives — known IUU vessels (from list)
+  - Unlabeled — all others
+  - Reliable negatives — very low-risk vessels (low activity, no gaps, far from EEZs)
+  - Train only on positives + reliable negatives → reduces label bias
+
+*Main Model*
+
+  - Gradient Boosted Decision Trees (GBDT 
+    - Learns non-linear combinations of signals
+    - Outputs risk score (0–1) used for ranking
+
+
+*Baselines & Ensembles*
+
+- Weighted logistic regression
+- Rule-based score (EEZ proximity + gaps + SAR + flag risk)
+- Isolation Forest (unsupervised anomaly detection)
+- Optional ensemble: weighted combination (e.g. 70% GBDT + 20% rules + 10% anomaly)
+
+*Evaluation Focus*
+Ranking-oriented metrics (not classification accuracy):
+
+  - Precision@K, Recall@K (Top-25, 100, 500)
+  - MRR (Mean Reciprocal Rank)
+  - PR-AUC & ROC-AUC 
+  
+# 5. Results Summary (from cross-validation & full run)
+
+5-fold Stratified CV (PU subset)
+
+  - PR-AUC: ~0.41
+  - ROC-AUC: ~0.95
+  - MRR: ~0.37
+  - Top-25 recall: ~60% (captures most known IUU in top 25)
+
+Full dataset ranking (PU + GBDT)
+
+  - Top-25: ~2 known IUU
+  - Top-100: ~3 known IUU
+  - Top-500: ~9 known IUU
+  - Top-1000: ~10 known IUU
+
+→ Model reliably surfaces most known IUU vessels near the top
+
+# 6. 
+  - top_risky_vessels.csvGlobal: ranked list
+  - top_risky_vessels_pu.csv: PU-only ranking 
+  - top_risky_vessels_gulf_med.csv: Gulf + Mediterranean filter
+  - top_risky_vessels_explanations.csv: Top-100 with feature importance breakdown
+  - top_risky_vessels_ensemble.csv: Weighted ensemble ranking
+  - top_risky_vessels_anomaly.csv: Pure anomaly-based ranking
+  
+# 7. Important Limitations & Notes
+
+  - IUU labels are MMSI-based (IMO matching needs extra registry)
+  - EEZ feature = distance to boundary proxy (not true “inside foreign EEZ”)
+  - SAR feature = spatial proximity only (no time-matching to AIS gaps)
+  - AIS gap fields often missing in mmsi-daily v3 data
+  - Risk score is a ranking signal, not legal proof
+  - Best used as prioritization tool — never replace human inspection
+
+# 8. Why This Matters
+
+Effective, data-driven triage can help enforcement agencies and NGOs:
+
+  - Focus scarce inspection resources
+  - Deter IUU activity through increased perceived risk
+  - Support marine conservation and sustainable fisheries

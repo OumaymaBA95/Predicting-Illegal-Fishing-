@@ -1,0 +1,19 @@
+Top-1000 IUU Summary
+====================
+Source: outputs/ranked_vessels_full.csv
+Top-1000 file: outputs/top_risky_vessels_top1000.csv
+IUU-only file: outputs/top_risky_vessels_top1000_iuu_only.csv
+Total known IUU: 8
+Known IUU in top-1000: 7
+
+Known IUU in top-1000 (mmsi, score):
+- 412333743 , 0.978372
+- 412365486 , 0.977865
+- 412328751 , 0.976599
+- 412356488 , 0.975600
+- 412328748 , 0.975135
+- 412008003 , 0.974332
+- 664246000 , 0.970870
+
+Known IUU missing from top-1000:
+- 412333749 (rank 6717, score 0.914524)
