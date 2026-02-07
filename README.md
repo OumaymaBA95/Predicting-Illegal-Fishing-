@@ -127,18 +127,22 @@ After you have outputs (features + ranked lists), you can browse them in a live 
 streamlit run dashboard.py
 ```
 
+Then open the app in your browser:
+- Local URL: `http://localhost:8501`
+
 What it shows:
 - Dataset stats (rows, known IUU count, base rate)
 - Top‑K ranked lists (PU / ensemble / anomaly) joined to key features
 - Optional Gulf+Med-only filter (`in_target_region`)
 - A simple map of mean vessel locations
-- Embedded evaluation write-ups (`MODEL_EVALUATION_RESULTS.md`, `MODEL_COMPARISON_SUMMARY.md`, `outputs/pu_scoring_report.md`)
+- Embedded evaluation write-ups (`MODEL_EVALUATION_RESULTS.md`, `MODEL_COMPARISON_SUMMARY.md`, `Cross validation.md`, `Cross-validation.html`, `outputs/pu_scoring_report.md`)
 
 ### Optional: deploy it (make it “live” on the web)
 - Push this repo to GitHub
-- Create a Streamlit Community Cloud app pointing at this repo
+- Create a Streamlit Community Cloud app pointing at this repo ([Streamlit Community Cloud](https://streamlit.io/cloud))
 - Set the app entrypoint to `dashboard.py`
 - Ensure `requirements.txt` is present (it is in this repo)
+After deployment, Streamlit will give you a public URL like `https://<your-app-name>.streamlit.app`.
 
 ## Recommended workflow (tiny label list)
 Use **PU‑only ranking** and review a fixed **Top‑K** list. Compare against the rule‑based baseline for interpretability.
