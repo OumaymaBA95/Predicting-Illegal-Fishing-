@@ -1,4 +1,4 @@
-## Predicting Illegal Fishing (IUU) — Senior Project
+## Predicting Illegal Fishing (IUU) 
 
 ### What is this project about?
 Illegal, Unreported, and Unregulated (IUU) fishing is a major global problem. It removes too many fish from the ocean, harms marine life, and hurts honest fishermen and coastal communities. This senior project builds a system to help spot suspicious fishing activity by combining five public datasets. The goal is to create a model that gives each vessel a **risk score** so authorities can focus inspections on the most likely violators.
